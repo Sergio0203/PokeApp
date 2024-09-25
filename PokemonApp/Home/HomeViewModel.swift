@@ -21,7 +21,7 @@ final class HomeViewModel: ObservableObject {
     init(pokemonService: PokemonServiceProtocol = PokemonService()) {
         self.pokemonService = pokemonService
     }
-
+    
     var pokemon: Pokemon? {
         get {
             guard let data = pokemonData else { return Pokemon(name: "", sprites: Sprite(), id: 0) }
@@ -29,9 +29,10 @@ final class HomeViewModel: ObservableObject {
         }
         set {
             pokemonData = try? JSONEncoder().encode(newValue)
+            isGuessed = false
         }
     }
-
+    
     func guessPokemon() {
         isGuessed = text.lowercased() == pokemon?.name.lowercased()
         text.removeAll()
@@ -42,13 +43,11 @@ final class HomeViewModel: ObservableObject {
             }
         }
     }
-    
     func newPokemon() {
         text.removeAll()
         if !isGuessed {
             score = 0
         }
-        isGuessed = false
         fetchPokemon()
     }
     
@@ -56,15 +55,19 @@ final class HomeViewModel: ObservableObject {
         WidgetCenter.shared.reloadTimelines(ofKind: "PokemonWidget")
     }
     
-    func fetchPokemon(pokemonNumber: Int = Int.random(in: 1...200)) {
-        pokemonService.getPokemon(pokemonNumber: pokemonNumber)
-            .receive(on: RunLoop.main)
-            .sink(receiveCompletion: { data in
-                
-            }, receiveValue: {[weak self] data in
-                guard let self else { return }
-                self.pokemon = data
-            }).store(in: &cancellables)
+    func fetchPokemon(pokemonNumber: Int = Int.random(in: 1...151)) {
+        pokemonService.getPokemon(pokemonNumber: pokemonNumber){ [weak self] result in
+            guard let self else { return }
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let pokemon):
+                    self.pokemon = pokemon
+                    
+                case .failure(let error):
+                    print(error)
+                }
+            }
+        }
     }
     
     func handleScenePhase(phase: ScenePhase){

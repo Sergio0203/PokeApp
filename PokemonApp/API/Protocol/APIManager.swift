@@ -27,12 +27,14 @@ enum APIError: Error {
     case invalidURL
     case invalidData
     case invalidResponse
+    case requestError(Error)
+    case decodingError(Error)
+    case parsingError
 }
 
-enum UserEndpoint: APIEndpoint {
+enum PokemonEndpoint: APIEndpoint {
     
     case getPokemon(with: Int)
-    
     var baseURL: URL {
         return URL(string: "https://pokeapi.co/api/v2/")!
     }

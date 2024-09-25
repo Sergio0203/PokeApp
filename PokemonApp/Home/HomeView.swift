@@ -44,7 +44,6 @@ struct HomeView: View {
         }
     }
     
-    
     @ViewBuilder
     private var pokemonImage: some View {
         if let sprite = viewModel.pokemon?.sprites.front_default{
@@ -52,7 +51,7 @@ struct HomeView: View {
                 switch phase {
                 case .success(let image):
                     image
-                        .brightness(viewModel.isGuessed ? 0 : -1)
+                        .brightness(viewModel.isGuessed ? 0 : -2)
                 case .failure:
                     Image(systemName: "exclamationmark.triangle")
                 case .empty:
